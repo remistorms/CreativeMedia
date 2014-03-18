@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Untitled Document</title>
+
+
+<script type="text/javascript" src="js/jquery.jqdock.min.js"></script>
+
+<style>
+
+
+#playerState {position:absolute; top:10px; left:30px; color:#ffffff;}
+#playState {font-weight:bold;}
+.playerPlaying {color:#ccff33;}
+.playerStopped {color:#ff6666;}
+.playerPaused {color:#ffcc00;}
+/*position and hide the menu initially - leave room for menu items to expand...*/
+#page {padding-top:150px; padding-bottom:20px; width:100%;}
+/*NB: using #menu2 here so that my default click actions from example.js don't get applied*/
+#menu2 {position:absolute; top:57px; left:0; width:100%; display:none;}
+/*dock styling...*/
+/*...centre the dock...*/
+#menu2 div.jqDockWrap {margin:0 auto;}
+/*...set the cursor...*/
+#menu2 div.jqDock {cursor:pointer;}
+</style>
+
+
+<script type="text/javascript">
+
+jQuery(document).ready(function($){
+  // set up the example app...
+  var paused = false, stopped = true, track = 1
+    , setPlayState = function(toggle){
+        var pp = 'images/' + (paused || stopped ? 'play' : 'pause'), txt;
+        if(toggle){ // SWITCH IMAGES...
+          $('#playBtn').jqDock({src:pp+'.jpg', altsrc:pp+'.png'});
+        }
+        txt = stopped ? 'Stopped' : (paused ? 'Paused' : 'Playing');
+        $('#playTrack').text(track);
+        $('#playState').text(txt)[0].className = 'player' + txt;
+      }
+    , nextPrevButton = function(){
+        var pp, toggle = paused || stopped, next = /next/.test(this.id)
+          , incr = (next && track < 4) ? 1 : ((!next && track > 1) ? -1 : 0);
+        if(incr !== 0){
+          track += incr;
+          switch(track){
+            case 1: pp = 'images/previous.grey.'; break;
+            case 2: if(incr > 0){  pp = 'images/previous.'; } break;
+            case 3: if(incr < 0){  pp = 'images/next.'; } break;
+            case 4: pp = 'images/next.grey.'; break;
+            default:
+          }
+          if(pp){ // SWITCH IMAGES...
+            $(track > 2 ? '#nextBtn' : '#prevBtn')
+                .jqDock({src:pp+'jpg', altsrc:pp+'png'});
+          }
+          stopped = paused = false;
+          setPlayState(toggle);
+        }
+      }
+    , playPauseButton = function(){
+        if(stopped){
+          stopped = false;
+        }else{
+          paused = !paused;
+        }
+        setPlayState(true);
+        return false;
+      }
+    , stopButton = function(){
+        var toggle = !paused;
+        if(!stopped){
+          stopped = true;
+          paused = false;
+          setPlayState(toggle);
+        }
+        return false;
+      };
+  $('#menu2').children().each(function(i){
+      var n = i;
+      if(n == 1){ $(this).click(stopButton); }
+      else if(n == 2){ $(this).click(playPauseButton); }
+      else{ $(this).click(nextPrevButton); }
+    });
+  // set up the options to be used for jqDock...
+  var dockOptions =
+    { align: 'middle' // horizontal menu, with expansion UP/DOWN from the middle
+    };
+  // ...and apply...
+  $('#menu2').jqDock(dockOptions);
+});
+
+</script>
+
+</head>
+
+<body>
+<div id='page'>
+  <div id='menu2'>
+    <img id='prevBtn' src='images/previous.grey.jpg' title='Previous' alt='images/previous.grey.png' />
+    <img id='stopBtn' src='images/stop.jpg' title='Stop' alt='images/stop.png' />
+    <img id='playBtn' src='images/play.jpg' title='Play' alt='images/play.png' />
+    <img id='nextBtn' src='images/next.jpg' title='Next' alt='images/next.png' />
+  </div>
+  <div id='playerState'>
+    Track : <span id='playTrack'>1</span> of 4; <span id='playState' class='playerStopped'>Stopped</span>...
+  </div>
+</div>
+</body>
+</html>
